@@ -3,19 +3,15 @@ package org.cc11001100.web.test.utils.export;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
-import org.apache.poi.hssf.usermodel.HSSFComment;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -231,12 +227,35 @@ public class ExportUtils {
 //	 
 //	      }
 	      try {
+	    	 path=processFileExtension(path);
 	         workbook.write(new FileOutputStream(new File(path)));
 	      } catch (IOException e) {
 	         // TODO Auto-generated catch block
 	         e.printStackTrace();
+	      }finally{
+	    	  try {
+	    		  //如果不释放资源的话，程序运行期间这个excel文件是不能被点击的。
+				workbook.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	      }
 	 
+	}
+	
+	/**
+	 * 对文件扩展名做一下处理，如果没有传入扩展名的话就给它补充上一个吧
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	private static String processFileExtension(String filename){
+		if(StringUtils.containsIgnoreCase(filename, "xls") ||
+				StringUtils.containsIgnoreCase(filename, "xlsx")){
+			return filename;
+		}
+		
+		return new StringBuilder(filename).append(".xls").toString();
 	}
 	
 }

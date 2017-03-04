@@ -7,7 +7,7 @@ package org.cc11001100.web.test.exception;
  * @author chenjc20326
  *
  */
-public class TheBiggestAttemptsException extends RuntimeException {
+public class TheBiggestAttemptsException extends HttpRequestHandlerException {
 
 	/**
 	 * 

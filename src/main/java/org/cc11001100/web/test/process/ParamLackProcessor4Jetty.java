@@ -1,6 +1,7 @@
 package org.cc11001100.web.test.process;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 import org.cc11001100.web.test.domain.ParamPair;
 import org.cc11001100.web.test.domain.ResponseDO;
@@ -42,10 +43,6 @@ public class ParamLackProcessor4Jetty implements ParamLackProcessor{
 	@Override
 	public ParamPair process(ResponseDO responseDO) {
 
-if("http://localhost:8080/busi/contract/replaceReceive.json".equals(responseDO.getUrl())){
-	System.out.println("stop");
-}		
-		
 		String resposneContent=responseDO.getResponseContent();
 		
 		Document document=Jsoup.parse(resposneContent);
@@ -74,10 +71,16 @@ if("http://localhost:8080/busi/contract/replaceReceive.json".equals(responseDO.g
 		
 		return new ParamPair(paramName, paramValue);
 	}
-
+	
+	/**
+	 * 这个类只能处理HTTP状态码为400的响应了
+	 */
 	@Override
 	public boolean canProcess(ResponseDO responseDO) {
-		return true;
+		if(responseDO==null){
+			return false;
+		}
+		return responseDO.getStatus()==HttpStatus.SC_BAD_REQUEST;
 	}
 	
 	/**

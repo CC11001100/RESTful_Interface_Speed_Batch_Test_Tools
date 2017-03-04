@@ -8,7 +8,6 @@ import java.util.Map;
 
 /**
  * 返回给客户端json数据对象
- * @author huzf
  *
  */
 public class JsonDO implements Serializable, Cloneable {

@@ -1,18 +1,18 @@
 package org.cc11001100.web.test.utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cc11001100.web.test.domain.ResponseDO;
 import org.cc11001100.web.test.handler.HttpRequestHandler;
 
 /**
- * 用于调度url，进行各种处理的
  * 
+ * 用于调度url，进行各种处理的
  * 
  * @author chenjc20326
  *
@@ -23,20 +23,48 @@ public class UrlScheduler {
 	/**
 	 * 傻啦吧唧的阻塞队列
 	 * 
+	 * @param host
+	 * @param post
+	 * @param urls
+	 * @param globalParams
+	 * @return
+	 */
+	public static List<ResponseDO> stupidBlockQueueScheduler(String host, String post, Set<String> urls, Map<String, String> globalParams){
+		
+		boolean jointHost=!StringUtils.isEmpty(host);
+		boolean jointPost=!StringUtils.isEmpty(post);
+		
+		List<ResponseDO> res=new ArrayList<>();
+		for(String url : urls){
+			
+			//每次请求都要带上全局参数，但是要避免污染全局参数
+			Map<String,String> currentParams=new HashMap<>();
+			currentParams.putAll(globalParams);
+			
+			StringBuilder newUrl=new StringBuilder();
+			if(jointHost){
+				newUrl.append(host);
+			}
+			if(jointPost){
+				newUrl.append(":").append(post);
+			}
+			newUrl.append(url);
+			
+			ResponseDO responseDO=new HttpRequestHandler().handle(newUrl.toString(), currentParams);
+			res.add(responseDO);
+		}
+		return res;
+	}
+	
+	/**
+	 * 傻啦吧唧的阻塞队列
+	 * 
 	 * @param urls
 	 * @param params
 	 * @return
 	 */
 	public static List<ResponseDO> stupidBlockQueueScheduler(Set<String> urls, Map<String, String> globalParams){
-		List<ResponseDO> res=new ArrayList<>();
-		for(String url : urls){
-			//每次请求都要带上全局参数，但是要避免污染全局参数
-			Map<String,String> currentParams=new HashMap<>();
-			currentParams.putAll(globalParams);
-			ResponseDO responseDO=new HttpRequestHandler().handle(url, currentParams);
-			res.add(responseDO);
-		}
-		return res;
+		return stupidBlockQueueScheduler(null,null,urls,globalParams);
 	}
 	
 	// 池子狗带！！！

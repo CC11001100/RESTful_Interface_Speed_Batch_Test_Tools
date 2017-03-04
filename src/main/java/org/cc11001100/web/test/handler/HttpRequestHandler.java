@@ -35,18 +35,15 @@ public class HttpRequestHandler implements RequestHandler {
 
 	private Logger logger=Logger.getLogger(HttpRequestHandler.class);
 	
-	/** 当服务器报400时的最大尝试次数 */
+	/** 当请求不是200时的最大尝试次数 */
 	private Integer LACK_PARAM_MAX_TRY=100;
 
-	/** 参数缺失处理器  */
-	private ParamLackProcessor paramLackProcessor=new ParamLackProcessor4Jetty();
+	/** 要使用到的一些参数缺失处理器，可以是一个集合，使用的时候会遍历直到找到一个能够处理的来使用  */
+	private List<ParamLackProcessor> paramLackProcessors=new ArrayList<>();
 	
-	public ParamLackProcessor getParamLackProcessor() {
-		return paramLackProcessor;
-	}
-
-	public void setParamLackProcessor(ParamLackProcessor paramLackProcessor) {
-		this.paramLackProcessor = paramLackProcessor;
+	public HttpRequestHandler() {
+		//装载要使用的参数处理器 
+		paramLackProcessors.add(new ParamLackProcessor4Jetty());
 	}
 
 	/**
@@ -125,21 +122,40 @@ public class HttpRequestHandler implements RequestHandler {
 		
 		ResponseDO responseDO=null;
 		for(int i=0;i<LACK_PARAM_MAX_TRY;i++){
+			
 			responseDO=post(url, params);
-			if(responseDO.getStatus()==HttpStatus.SC_BAD_REQUEST){
-				ParamPair paramPair=paramLackProcessor.process(responseDO);
-				if(paramPair==null){
-					break;
-				}
-				params.put(paramPair.getName(), paramPair.getValue());
-			}else {
+			if(responseDO==null){
+				continue;
+			}else if(responseDO.getStatus()==HttpStatus.SC_OK){
 				return responseDO;
+			}else if(!processorLackedParam(responseDO)){
+				//调用缺失参数处理器来处理，当所有的都不能解析的时候直接结束掉尝试，反正已经不能搞到了
+				break;
 			}
+			
 		}
 		
 		return responseDO;
 	}
 	
+	/**
+	 * 使用缺失参数处理器来解析服务器的返回信息尝试得到一个该有的返回
+	 * 
+	 * @param responseDO
+	 * @return
+	 */
+	private boolean processorLackedParam(ResponseDO responseDO){
+		for(ParamLackProcessor paramLackProcessor : paramLackProcessors){
+			if(paramLackProcessor.canProcess(responseDO)){
+				ParamPair paramPair=paramLackProcessor.process(responseDO);
+				if(paramPair!=null){
+					responseDO.getParams().put(paramPair.getName(), paramPair.getValue());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	// 异步去死!!!
 //	/**

@@ -1,4 +1,4 @@
-## RESTful
+## 简单的web接口批量测试工具
 
 
 
@@ -9,7 +9,7 @@
 			2. 然后UrlScheduler#setParamLackProcessor(ParamLackProcessor paramLackProcessor)
 
 
-
+2. 测试结果将被导出为Excel表格。
 
 
 

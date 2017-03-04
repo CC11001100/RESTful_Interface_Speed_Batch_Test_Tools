@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.springframework.stereotype.Component;
 
 /**
  * 参数生成器，根据传入的参数名生成对应的值
@@ -17,6 +18,7 @@ import org.joda.time.DateTime;
  * @author chenjc20326
  *
  */
+@Component
 public class ParamGenerator {
 	
 	/**
@@ -115,6 +117,17 @@ public class ParamGenerator {
 		//可能是String类型的Integer
 		if(paramName.contains("num") || paramName.contains("number") || paramName.contains("count") || paramName.contains("id")){
 			return processInteger(paramName);
+		}
+		
+		//加入对手机号的处理
+		if(paramName.contains("phone")){
+			//我的  = = 
+			return "13791480000";
+		}
+		
+		//对可能的枚举类型做处理，一般枚举类型都是 0/1/2/3...之类的值，希望能够蒙得对...
+		if(paramName.contains("type")){
+			return String.valueOf(new Random().nextInt(5));
 		}
 		
 		return DEFAULT_STRING;

@@ -2,13 +2,17 @@ package org.cc11001100.web.test.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 /**
  * 
@@ -18,7 +22,8 @@ import org.apache.log4j.Logger;
  * @author chenjc20326
  *
  */
-public abstract class InputUtil {
+@Component
+public class InputUtil {
 	
 	private static Logger logger=Logger.getLogger(InputUtil.class);
 
@@ -29,18 +34,14 @@ public abstract class InputUtil {
 	 * @return
 	 */
 	public static Set<String> readUrlFromFiles(File ...files){
+		List<File> recursionFile=new ArrayList<>();
+		for(File f:files){
+			recursionFile.addAll(recursionListDirectory(f));
+		}
+		
 		Set<String> urls=new HashSet<>();
-		for(File file:files){
+		for(File file:recursionFile){
 			try {
-//				String fileContent=FileUtils.readFileToString(file);
-//				if(!StringUtils.isEmpty(fileContent)){
-//					String[] ss=fileContent.split("\\s+");
-//					for(String s : ss){
-//						if(!StringUtils.isEmpty(s)){
-//							urls.add(s);
-//						}
-//					}
-//				}
 				// 改为line by line 
 				@SuppressWarnings("unchecked")
 				List<String> list=FileUtils.readLines(file, "UTF-8");
@@ -61,6 +62,7 @@ public abstract class InputUtil {
 	
 	/**
 	 * 从一大串文件中读入url
+	 * 
 	 * @param files
 	 * @return
 	 */
@@ -74,6 +76,7 @@ public abstract class InputUtil {
 	
 	/**
 	 * 从单个文件中读取
+	 * 
 	 * @param file
 	 * @return
 	 */
@@ -83,6 +86,7 @@ public abstract class InputUtil {
 	
 	/**
 	 * 从单个文件中读取
+	 * 
 	 * @param filePath
 	 * @return
 	 */
@@ -125,4 +129,57 @@ public abstract class InputUtil {
 		}
 		return false;
 	}
+	
+	/**
+	 * 递归列出目录中的文件
+	 * 
+	 * @param dir
+	 * @return
+	 */
+	private static List<File> recursionListDirectory(File dir){
+		
+		List<File> res=new ArrayList<>();
+		
+		if(!dir.isDirectory()){
+			res.add(dir);
+			return res;
+		}
+		
+		File[] files=dir.listFiles();
+		for(File f:files){
+			if(f.isDirectory()){
+				res.addAll(recursionListDirectory(f));
+			}else{
+				res.add(f);
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * 将Set中的每一行解析为一个参数
+	 * 
+	 * @param lines
+	 * @return
+	 */
+	public static Map<String, String> linesToParamMap(Set<String> lines){
+		Map<String,String> params=new HashMap<>();
+		for(String s:lines){
+			if(StringUtils.isEmpty(s)){
+				continue;
+			}
+			String[] ss=s.split("=");
+			if(ss.length!=2){
+				continue;
+			}
+			params.put(ss[0], ss[1]);
+			
+			StringBuilder mesg=new StringBuilder();
+			mesg.append("Parse global param [").append(ss[0]).append(",").append(ss[1]).append("] done.");
+			logger.info(mesg.toString());
+		}
+		return params;
+	}
+	
 }
