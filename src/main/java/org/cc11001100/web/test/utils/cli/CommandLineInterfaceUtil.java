@@ -6,6 +6,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,12 +31,26 @@ public class CommandLineInterfaceUtil {
 		
 	}
 	
+	/**
+	 * 处理参数
+	 * 
+	 * @param args
+	 */
 	private void processArgs(String[] args){
 		
 		Options options=new Options();
 		
-		CommandLineParser parser=new DefaultParser();
-		CommandLine cmd=parser.parse(options, args);
+		try {
+			CommandLineParser parser=new DefaultParser();
+			CommandLine cmd=parser.parse(options, args);
+			
+			if(cmd.hasOption("urls")){
+				
+			}
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		
 		
 	}
